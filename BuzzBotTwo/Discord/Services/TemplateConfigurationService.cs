@@ -9,6 +9,7 @@ namespace BuzzBotTwo.Discord.Services
     public interface ITemplateConfigurationService
     {
         void UpdateTemplate(object configObject, int key, int value);
+        void UpdateTemplate(object configObject, int key, string value);
         IEnumerable<ITemplatePropertyInfo> GetPropertyData(object configObject);
     }
 
@@ -32,6 +33,12 @@ namespace BuzzBotTwo.Discord.Services
         public void UpdateTemplate(object configObject, int key, string value)
         {
             var property = GetConfigurationProperty(configObject, key);
+            if (property.PropertyType == typeof(int))
+            {
+                var valueAsInt = int.Parse(value);
+                UpdateTemplate(configObject, key, valueAsInt);
+                return;
+            }
             if (property.PropertyType != typeof(string))
             {
                 throw new InvalidOperationException($"Invalid use of {nameof(UpdateTemplate)}, {property.Name} is not of type {nameof(String)}");

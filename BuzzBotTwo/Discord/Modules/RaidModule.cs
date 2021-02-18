@@ -15,23 +15,46 @@ namespace BuzzBotTwo.Discord.Modules
     public class RaidModule : BotModule
     {
         private readonly IRecurringRaidTemplateRepository _recurringRaidTemplateRepository;
+        private readonly ISoftResRaidTemplateRepository _softResRaidTemplateRepository;
         private readonly ITemplateConfigurationService _templateConfigurationService;
         private readonly IPageService _pageService;
 
         public RaidModule(IUserDataService userDataService,
             IRecurringRaidTemplateRepository recurringRaidTemplateRepository,
+            ISoftResRaidTemplateRepository softResRaidTemplateRepository,
             ITemplateConfigurationService templateConfigurationService,
             IPageService pageService) : base(userDataService)
         {
             _recurringRaidTemplateRepository = recurringRaidTemplateRepository;
+            _softResRaidTemplateRepository = softResRaidTemplateRepository;
             _templateConfigurationService = templateConfigurationService;
             _pageService = pageService;
         }
-        [Command("config")]
-        public async Task PrintConfig()
+        [Command("update")]
+        public async Task UpdateConfig(int key, string value)
+        {
+            if (key == typeof(RecurringRaidTemplate)
+                .GetProperty(nameof(RecurringRaidTemplate.SoftResTemplateId))
+                .GetCustomAttribute<ConfigurationKeyAttribute>().Key)
+            {
+                var templateExists = await _softResRaidTemplateRepository.Contains(value);
+                if (!templateExists)
+                {
+                    await ReplyAsync("No such soft res template exists.");
+                    return;
+                }
+            }
+
+            var config = await AddOrGetRaidTemplate(false);
+            _templateConfigurationService.UpdateTemplate(config, key, value);
+            await _recurringRaidTemplateRepository.SaveAllChangesAsync();
+            await ReplyAsync("Configuration updated successfully");
+        }
+
+        public async Task<RecurringRaidTemplate> AddOrGetRaidTemplate(bool saveChanges = true)
         {
             var config = (await _recurringRaidTemplateRepository.GetAsync(qry =>
-                qry.Where(cfg => cfg.ServerId == Context.Guild.Id)))
+                    qry.Where(cfg => cfg.ServerId == Context.Guild.Id)))
                 .FirstOrDefault();
             if (config == null)
             {
@@ -42,8 +65,16 @@ namespace BuzzBotTwo.Discord.Modules
                     ResetDayOfWeek = (int)DayOfWeek.Monday
                 };
                 await _recurringRaidTemplateRepository.PostAsync(config);
-                await _recurringRaidTemplateRepository.SaveAllChangesAsync();
+                if (saveChanges)
+                    await _recurringRaidTemplateRepository.SaveAllChangesAsync();
             }
+
+            return config;
+        }
+        [Command("config")]
+        public async Task PrintConfig()
+        {
+            var config = await AddOrGetRaidTemplate();
 
             var configPropertyData =
                 _templateConfigurationService.GetPropertyData(config).ToList().OrderBy(pi => pi.Key);
@@ -59,7 +90,7 @@ namespace BuzzBotTwo.Discord.Modules
                     .GetProperty(nameof(RecurringRaidTemplate.ResetDayOfWeek))
                     .GetCustomAttribute<ConfigurationKeyAttribute>().Key)
                 {
-                    valueString = $"{kvp.Value} ({((DayOfWeek) kvp.Value)})";
+                    valueString = $"{kvp.Value} ({((DayOfWeek)kvp.Value)})";
                 }
                 pageBuilder.AddRow(new[] { kvp.Key.ToString(), kvp.Name, valueString });
             }
