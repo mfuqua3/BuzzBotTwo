@@ -3,9 +3,9 @@ using BuzzBotTwo.Domain.Entities;
 
 namespace BuzzBotTwo.Domain
 {
-    public class ServerUser
+    public class ServerUser:IEntity<Guid>
     {
-        public Guid ServerUserId { get; set; }
+        public Guid Id { get; set; }
         public ulong ServerId { get; set; }
         public Server Server { get; set; }
         public ulong UserId { get; set; }

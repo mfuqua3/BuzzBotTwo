@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BuzzBotTwo.Domain.Entities
 {
-    public class SoftResUser
+    public class SoftResUser:IEntity<ulong>
     {
         public ulong Id { get; set; }
         public string Name { get; set; }

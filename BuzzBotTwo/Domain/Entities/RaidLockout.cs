@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BuzzBotTwo.Domain.Entities
 {
-    public class RaidLockout
+    public class RaidLockout:IEntity<int>
     {
         public int Id { get; set; }
         public DateTime StartDate { get; set; }

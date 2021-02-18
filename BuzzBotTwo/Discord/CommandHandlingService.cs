@@ -20,7 +20,11 @@ namespace BuzzBotTwo.Discord
         private readonly IOptions<DiscordConfiguration> _configuration;
         private IServiceProvider _provider;
 
-        public CommandHandlingService(IServiceProvider provider, DiscordSocketClient discord, CommandService commands, IOptions<DiscordConfiguration> configuration)
+        public CommandHandlingService(
+            IServiceProvider provider, 
+            DiscordSocketClient discord, 
+            CommandService commands, 
+            IOptions<DiscordConfiguration> configuration)
         {
             _discord = discord;
             _commands = commands;

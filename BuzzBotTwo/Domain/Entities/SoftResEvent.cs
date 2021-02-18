@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BuzzBotTwo.Domain.Entities
 {
-    public class SoftResEvent
+    public class SoftResEvent:IEntity<string>
     {
         public string Id { get; set; }
         public string Instance { get; set; }

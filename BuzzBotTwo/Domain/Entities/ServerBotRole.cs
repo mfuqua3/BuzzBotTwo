@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using BuzzBotTwo.Domain.Entities;
 
 namespace BuzzBotTwo.Domain
 {
-    public class ServerBotRole
+    public class ServerBotRole:IEntity<ulong>
     {
         public ulong Id { get; set; }
         public ulong ServerId { get; set; }

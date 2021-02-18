@@ -87811,6 +87811,30 @@ namespace BuzzBotTwo.Migrations
                     b.ToTable("RaidParticipants");
                 });
 
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.RecurringRaidTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ResetDayOfWeek")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("ServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SoftResTemplateId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServerId");
+
+                    b.HasIndex("SoftResTemplateId");
+
+                    b.ToTable("RecurringRaidTemplates");
+                });
+
             modelBuilder.Entity("BuzzBotTwo.Domain.Entities.ReservedItem", b =>
                 {
                     b.Property<ulong>("Id")
@@ -87830,6 +87854,17 @@ namespace BuzzBotTwo.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ReservedItems");
+                });
+
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.Server", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Servers");
                 });
 
             modelBuilder.Entity("BuzzBotTwo.Domain.Entities.SoftResEvent", b =>
@@ -87861,6 +87896,30 @@ namespace BuzzBotTwo.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SoftResEvents");
+                });
+
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.SoftResRaidTemplate", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Faction")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Instance")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ReserveAmounts")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("ServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServerId");
+
+                    b.ToTable("SoftResRaidTemplates");
                 });
 
             modelBuilder.Entity("BuzzBotTwo.Domain.Entities.SoftResUser", b =>
@@ -87907,20 +87966,6 @@ namespace BuzzBotTwo.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("BuzzBotTwo.Domain.Server", b =>
-                {
-                    b.Property<ulong>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<ulong>("RaidChannel")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Servers");
-                });
-
             modelBuilder.Entity("BuzzBotTwo.Domain.ServerBotRole", b =>
                 {
                     b.Property<ulong>("Id")
@@ -87944,7 +87989,7 @@ namespace BuzzBotTwo.Migrations
 
             modelBuilder.Entity("BuzzBotTwo.Domain.ServerUser", b =>
                 {
-                    b.Property<Guid>("ServerUserId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
@@ -87960,7 +88005,7 @@ namespace BuzzBotTwo.Migrations
                     b.Property<ulong>("UserId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("ServerUserId");
+                    b.HasKey("Id");
 
                     b.HasIndex("RoleId");
 
@@ -88012,6 +88057,19 @@ namespace BuzzBotTwo.Migrations
                         .HasForeignKey("ServerUserId");
                 });
 
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.RecurringRaidTemplate", b =>
+                {
+                    b.HasOne("BuzzBotTwo.Domain.Entities.Server", "Server")
+                        .WithMany()
+                        .HasForeignKey("ServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BuzzBotTwo.Domain.Entities.SoftResRaidTemplate", "SoftResTemplate")
+                        .WithMany()
+                        .HasForeignKey("SoftResTemplateId");
+                });
+
             modelBuilder.Entity("BuzzBotTwo.Domain.Entities.ReservedItem", b =>
                 {
                     b.HasOne("BuzzBotTwo.Domain.Entities.Item", "Item")
@@ -88023,6 +88081,15 @@ namespace BuzzBotTwo.Migrations
                     b.HasOne("BuzzBotTwo.Domain.Entities.SoftResUser", "User")
                         .WithMany("ReservedItems")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.SoftResRaidTemplate", b =>
+                {
+                    b.HasOne("BuzzBotTwo.Domain.Entities.Server", "Server")
+                        .WithMany()
+                        .HasForeignKey("ServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -88046,7 +88113,7 @@ namespace BuzzBotTwo.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BuzzBotTwo.Domain.Server", "Server")
+                    b.HasOne("BuzzBotTwo.Domain.Entities.Server", "Server")
                         .WithMany("ServerBotRoles")
                         .HasForeignKey("ServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -88065,7 +88132,7 @@ namespace BuzzBotTwo.Migrations
                         .WithMany("Users")
                         .HasForeignKey("ServerBotRoleId");
 
-                    b.HasOne("BuzzBotTwo.Domain.Server", "Server")
+                    b.HasOne("BuzzBotTwo.Domain.Entities.Server", "Server")
                         .WithMany("ServerUsers")
                         .HasForeignKey("ServerId")
                         .OnDelete(DeleteBehavior.Cascade)

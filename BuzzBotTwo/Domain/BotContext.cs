@@ -19,6 +19,8 @@ namespace BuzzBotTwo.Domain
         public DbSet<SoftResEvent> SoftResEvents { get; set; }
         public DbSet<SoftResUser> SoftResUsers { get; set; }
         public DbSet<ReservedItem> ReservedItems { get; set; }
+        public DbSet<RecurringRaidTemplate> RecurringRaidTemplates { get; set; }
+        public DbSet<SoftResRaidTemplate> SoftResRaidTemplates { get; set; }
         public BotContext(DbContextOptions options) : base(options)
         {
 

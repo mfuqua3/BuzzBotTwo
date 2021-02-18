@@ -1,6 +1,6 @@
 ﻿using Discord;
 
-namespace BuzzBotTwo.Discord
+namespace BuzzBotTwo.Discord.Services
 {
     public interface IAdministrationService
     {

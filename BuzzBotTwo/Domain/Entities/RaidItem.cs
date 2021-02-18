@@ -2,7 +2,7 @@
 
 namespace BuzzBotTwo.Domain.Entities
 {
-    public class RaidItem
+    public class RaidItem:IEntity<uint>
     {
         public uint Id { get; set; }
         public DateTime? DateAwarded { get; set; }

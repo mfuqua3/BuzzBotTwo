@@ -1,7 +1,9 @@
-﻿using Discord;
+﻿using BuzzBotTwo.Discord.Services;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace BuzzBotTwo.Discord
 {
@@ -27,7 +29,10 @@ namespace BuzzBotTwo.Discord
                 .AddScoped<ScopedCommandContext>()
                 .AddSingleton<IAdministrationService, AdministrationService>()
                 .AddSingleton<CommandService>()
-                .AddSingleton<CommandHandlingService>();
+                .AddSingleton<CommandHandlingService>()
+                .AddTransient<IQueryService, QueryService>()
+                .AddTransient<IPageService, PageService>()
+                .AddTransient<IEmoteService, EmoteService>();
             return services;
         }
     }

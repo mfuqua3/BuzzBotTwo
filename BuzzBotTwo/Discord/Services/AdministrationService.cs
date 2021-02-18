@@ -3,7 +3,7 @@ using System.Linq;
 using Discord;
 using Microsoft.Extensions.Configuration;
 
-namespace BuzzBotTwo.Discord
+namespace BuzzBotTwo.Discord.Services
 {
     public class AdministrationService : IAdministrationService
     {

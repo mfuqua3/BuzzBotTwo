@@ -17,7 +17,6 @@ namespace BuzzBotTwo
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("init");
             var isService = !(Debugger.IsAttached || args.Contains("--console"));
             var pathToContentRoot = Directory.GetCurrentDirectory();
             var webHostArgs = args.Where(arg => arg != "--console").ToArray();

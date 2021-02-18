@@ -2,7 +2,7 @@
 
 namespace BuzzBotTwo.Domain.Entities
 {
-    public class RaidParticipant
+    public class RaidParticipant:IEntity<Guid>
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

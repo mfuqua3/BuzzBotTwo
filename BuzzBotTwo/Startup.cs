@@ -4,7 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using BuzzBotTwo.Configuration;
 using BuzzBotTwo.Discord;
+using BuzzBotTwo.Discord.Services;
 using BuzzBotTwo.Domain;
+using BuzzBotTwo.Factories;
+using BuzzBotTwo.Repository;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Builder;
@@ -31,7 +34,11 @@ namespace BuzzBotTwo
         {
             services.Configure<DiscordConfiguration>(_configuration.GetSection("Discord"));
             services.AddDbContext<BotContext>(opt => opt.UseSqlite(_configuration.GetConnectionString("DefaultConnection")));
-            services.AddDiscordComponents();
+            services.AddDiscordComponents()
+                .AddRepositories()
+                .AddTransient<ISoftResRaidTemplateFactory, SoftResRaidTemplateFactory>()
+                .AddTransient<ITemplateConfigurationService, TemplateConfigurationService>()
+                .AddScoped<IUserDataService, UserDataService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

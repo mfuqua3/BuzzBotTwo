@@ -1,6 +1,8 @@
-﻿namespace BuzzBotTwo.Domain
+﻿using BuzzBotTwo.Domain.Entities;
+
+namespace BuzzBotTwo.Domain
 {
-    public class BotRole
+    public class BotRole:IEntity<int>
     {
         public int Id { get; set; }
         public string Title { get; set; }
