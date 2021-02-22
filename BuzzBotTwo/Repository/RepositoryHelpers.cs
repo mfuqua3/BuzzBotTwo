@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using BuzzBotTwo.Domain;
+using BuzzBotTwo.Domain.Entities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BuzzBotTwo.Repository
 {
@@ -20,8 +22,20 @@ namespace BuzzBotTwo.Repository
                 .AddScoped<ISoftResUserRepository, SoftResUserRepository>()
                 .AddScoped<IUserRepository, UserRepository>()
                 .AddScoped<IRecurringRaidTemplateRepository, RecurringRaidTemplateRepository>()
-                .AddScoped<ISoftResRaidTemplateRepository, SoftResRaidRaidTemplateRepository>();
+                .AddScoped<ISoftResRaidTemplateRepository, SoftResRaidRaidTemplateRepository>()
+                .AddScoped<IPaginatedMessageRepository, PaginatedMessageRepository>()
+                .AddScoped<IMessageChannelRepository, MessageChannelRepository>()
+                .AddScoped<ISoftResRaidMonitorRepository, SoftResRaidMonitorRepository>();
             return services;
+        }
+    }
+
+    public interface IMessageChannelRepository:IRepository<MessageChannel, ulong> { }
+
+    public class MessageChannelRepository : Repository<MessageChannel, ulong>, IMessageChannelRepository
+    {
+        public MessageChannelRepository(BotContext db) : base(db)
+        {
         }
     }
 }

@@ -8,8 +8,10 @@ namespace BuzzBotTwo.External.SoftResIt
         ISoftResRaidBuilder StartAt(DateTime startTime);
         ISoftResRaidBuilder LockStart();
         ISoftResRaidBuilder ForInstance(SoftResInstance instance);
+        ISoftResRaidBuilder ForInstance(string instance);
         ISoftResRaidBuilder TotalReserves(int amount);
         ISoftResRaidBuilder ForFaction(SoftResFaction faction);
+        ISoftResRaidBuilder ForFaction(string faction);
         ISoftResRaidBuilder HideReserves();
         RaidModel Build();
     }

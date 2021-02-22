@@ -14,6 +14,18 @@ namespace BuzzBotTwo.Domain.Entities
         public ulong Id { get; set; }
         public List<ServerBotRole> ServerBotRoles { get; set; }
         public List<ServerUser> ServerUsers { get; set; }
+        public List<Raid> Raids { get; set; }
+    }
+
+    public class MessageChannel:IEntity<ulong>
+    {
+        public ulong Id { get; set; }
+        public ulong? ServerId { get; set; }
+        public Server Server { get; set; }
+        public ulong? UserId { get; set; }
+        public User User { get; set; }
+        public List<PaginatedMessage> PaginatedMessages { get; set; }
+        
     }
 
     public class RecurringRaidTemplate : IEntity<int>

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BuzzBotTwo.Migrations
 {
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -97,27 +97,6 @@ namespace BuzzBotTwo.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Raids",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    StartTime = table.Column<DateTime>(nullable: true),
-                    EndTime = table.Column<DateTime>(nullable: true),
-                    RaidLockoutId = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Raids", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Raids_RaidLockouts_RaidLockoutId",
-                        column: x => x.RaidLockoutId,
-                        principalTable: "RaidLockouts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ServerBotRoles",
                 columns: table => new
                 {
@@ -165,30 +144,49 @@ namespace BuzzBotTwo.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MessageChannels",
+                columns: table => new
+                {
+                    Id = table.Column<ulong>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ServerId = table.Column<ulong>(nullable: true),
+                    UserId = table.Column<ulong>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MessageChannels", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MessageChannels_Servers_ServerId",
+                        column: x => x.ServerId,
+                        principalTable: "Servers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_MessageChannels_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ServerUsers",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
                     ServerId = table.Column<ulong>(nullable: false),
                     UserId = table.Column<ulong>(nullable: false),
-                    RoleId = table.Column<int>(nullable: false),
-                    ServerBotRoleId = table.Column<ulong>(nullable: true)
+                    RoleId = table.Column<ulong>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ServerUsers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ServerUsers_Roles_RoleId",
+                        name: "FK_ServerUsers_ServerBotRoles_RoleId",
                         column: x => x.RoleId,
-                        principalTable: "Roles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ServerUsers_ServerBotRoles_ServerBotRoleId",
-                        column: x => x.ServerBotRoleId,
                         principalTable: "ServerBotRoles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ServerUsers_Servers_ServerId",
                         column: x => x.ServerId,
@@ -228,6 +226,122 @@ namespace BuzzBotTwo.Migrations
                         principalTable: "SoftResRaidTemplates",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PaginatedMessages",
+                columns: table => new
+                {
+                    Id = table.Column<ulong>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    CurrentPage = table.Column<int>(nullable: false),
+                    HasHiddenContent = table.Column<bool>(nullable: false),
+                    IsRevealed = table.Column<bool>(nullable: false),
+                    MessageChannelId = table.Column<ulong>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaginatedMessages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PaginatedMessages_MessageChannels_MessageChannelId",
+                        column: x => x.MessageChannelId,
+                        principalTable: "MessageChannels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Raids",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    MessageId = table.Column<ulong>(nullable: false),
+                    ChannelId = table.Column<ulong>(nullable: false),
+                    Active = table.Column<bool>(nullable: false),
+                    StartTime = table.Column<DateTime>(nullable: true),
+                    EndTime = table.Column<DateTime>(nullable: true),
+                    ServerId = table.Column<ulong>(nullable: false),
+                    SoftResEventId = table.Column<string>(nullable: true),
+                    RaidLockoutId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Raids", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Raids_MessageChannels_ChannelId",
+                        column: x => x.ChannelId,
+                        principalTable: "MessageChannels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Raids_RaidLockouts_RaidLockoutId",
+                        column: x => x.RaidLockoutId,
+                        principalTable: "RaidLockouts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Raids_Servers_ServerId",
+                        column: x => x.ServerId,
+                        principalTable: "Servers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Raids_SoftResEvents_SoftResEventId",
+                        column: x => x.SoftResEventId,
+                        principalTable: "SoftResEvents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SoftResRaidMonitors",
+                columns: table => new
+                {
+                    Id = table.Column<ulong>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    RaidChannelId = table.Column<ulong>(nullable: false),
+                    SoftResEventId = table.Column<string>(nullable: true),
+                    LastUpdated = table.Column<DateTime>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    RemoveAt = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SoftResRaidMonitors", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SoftResRaidMonitors_MessageChannels_RaidChannelId",
+                        column: x => x.RaidChannelId,
+                        principalTable: "MessageChannels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SoftResRaidMonitors_SoftResEvents_SoftResEventId",
+                        column: x => x.SoftResEventId,
+                        principalTable: "SoftResEvents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Pages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    PageNumber = table.Column<int>(nullable: false),
+                    MessageId = table.Column<ulong>(nullable: false),
+                    IsHidden = table.Column<bool>(nullable: false),
+                    Content = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Pages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Pages_PaginatedMessages_MessageId",
+                        column: x => x.MessageId,
+                        principalTable: "PaginatedMessages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -36877,6 +36991,26 @@ namespace BuzzBotTwo.Migrations
                 values: new object[] { 1, "Owner" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_MessageChannels_ServerId",
+                table: "MessageChannels",
+                column: "ServerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MessageChannels_UserId",
+                table: "MessageChannels",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Pages_MessageId",
+                table: "Pages",
+                column: "MessageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PaginatedMessages_MessageChannelId",
+                table: "PaginatedMessages",
+                column: "MessageChannelId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RaidItems_ItemId",
                 table: "RaidItems",
                 column: "ItemId");
@@ -36902,9 +37036,29 @@ namespace BuzzBotTwo.Migrations
                 column: "ServerUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Raids_Active",
+                table: "Raids",
+                column: "Active");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Raids_ChannelId",
+                table: "Raids",
+                column: "ChannelId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Raids_RaidLockoutId",
                 table: "Raids",
                 column: "RaidLockoutId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Raids_ServerId",
+                table: "Raids",
+                column: "ServerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Raids_SoftResEventId",
+                table: "Raids",
+                column: "SoftResEventId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RecurringRaidTemplates_ServerId",
@@ -36942,11 +37096,6 @@ namespace BuzzBotTwo.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ServerUsers_ServerBotRoleId",
-                table: "ServerUsers",
-                column: "ServerBotRoleId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ServerUsers_ServerId",
                 table: "ServerUsers",
                 column: "ServerId");
@@ -36955,6 +37104,16 @@ namespace BuzzBotTwo.Migrations
                 name: "IX_ServerUsers_UserId",
                 table: "ServerUsers",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SoftResRaidMonitors_RaidChannelId",
+                table: "SoftResRaidMonitors",
+                column: "RaidChannelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SoftResRaidMonitors_SoftResEventId",
+                table: "SoftResRaidMonitors",
+                column: "SoftResEventId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SoftResRaidTemplates_ServerId",
@@ -36975,6 +37134,9 @@ namespace BuzzBotTwo.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Pages");
+
+            migrationBuilder.DropTable(
                 name: "RaidItems");
 
             migrationBuilder.DropTable(
@@ -36982,6 +37144,12 @@ namespace BuzzBotTwo.Migrations
 
             migrationBuilder.DropTable(
                 name: "ReservedItems");
+
+            migrationBuilder.DropTable(
+                name: "SoftResRaidMonitors");
+
+            migrationBuilder.DropTable(
+                name: "PaginatedMessages");
 
             migrationBuilder.DropTable(
                 name: "SoftResRaidTemplates");
@@ -36993,9 +37161,6 @@ namespace BuzzBotTwo.Migrations
                 name: "SoftResUsers");
 
             migrationBuilder.DropTable(
-                name: "SoftResEvents");
-
-            migrationBuilder.DropTable(
                 name: "RaidParticipants");
 
             migrationBuilder.DropTable(
@@ -37005,7 +37170,13 @@ namespace BuzzBotTwo.Migrations
                 name: "ServerUsers");
 
             migrationBuilder.DropTable(
+                name: "MessageChannels");
+
+            migrationBuilder.DropTable(
                 name: "RaidLockouts");
+
+            migrationBuilder.DropTable(
+                name: "SoftResEvents");
 
             migrationBuilder.DropTable(
                 name: "ServerBotRoles");

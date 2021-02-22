@@ -25,6 +25,18 @@ namespace BuzzBotTwo.External.SoftResIt
             return await Post<RaidModel>("raid/create", requestBody);
         }
 
+        public async Task<RaidModel> Query(string key)
+        {
+            var httpResult = await _client.GetAsync($"{ApiBaseAddress}/raid/{key}");
+            if (!httpResult.IsSuccessStatusCode)
+            {
+                throw new Exception(httpResult.ReasonPhrase);
+            }
+
+            var jsonResponse = await httpResult.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<RaidModel>(jsonResponse);
+        }
+
         private async Task<T> Post<T>(string route, object requestPayload)
         {
             var requestBody = JsonConvert.SerializeObject(requestPayload, Formatting.Indented, new JsonSerializerSettings

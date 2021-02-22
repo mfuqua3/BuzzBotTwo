@@ -87719,24 +87719,118 @@ namespace BuzzBotTwo.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.MessageChannel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong?>("ServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong?>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServerId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MessageChannels");
+                });
+
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.Page", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("MessageId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PageNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
+
+                    b.ToTable("Pages");
+                });
+
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.PaginatedMessage", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CurrentPage")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("HasHiddenContent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsRevealed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("MessageChannelId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageChannelId");
+
+                    b.ToTable("PaginatedMessages");
+                });
+
             modelBuilder.Entity("BuzzBotTwo.Domain.Entities.Raid", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("Active")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("ChannelId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("TEXT");
 
+                    b.Property<ulong>("MessageId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int?>("RaidLockoutId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("ServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SoftResEventId")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("StartTime")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Active");
+
+                    b.HasIndex("ChannelId");
+
                     b.HasIndex("RaidLockoutId");
+
+                    b.HasIndex("ServerId");
+
+                    b.HasIndex("SoftResEventId");
 
                     b.ToTable("Raids");
                 });
@@ -87898,6 +87992,36 @@ namespace BuzzBotTwo.Migrations
                     b.ToTable("SoftResEvents");
                 });
 
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.SoftResRaidMonitor", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastUpdated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<ulong>("RaidChannelId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("RemoveAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SoftResEventId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RaidChannelId");
+
+                    b.HasIndex("SoftResEventId");
+
+                    b.ToTable("SoftResRaidMonitors");
+                });
+
             modelBuilder.Entity("BuzzBotTwo.Domain.Entities.SoftResRaidTemplate", b =>
                 {
                     b.Property<string>("Id")
@@ -87993,10 +88117,7 @@ namespace BuzzBotTwo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<ulong?>("ServerBotRoleId")
+                    b.Property<ulong>("RoleId")
                         .HasColumnType("INTEGER");
 
                     b.Property<ulong>("ServerId")
@@ -88009,8 +88130,6 @@ namespace BuzzBotTwo.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.HasIndex("ServerBotRoleId");
-
                     b.HasIndex("ServerId");
 
                     b.HasIndex("UserId");
@@ -88018,11 +88137,56 @@ namespace BuzzBotTwo.Migrations
                     b.ToTable("ServerUsers");
                 });
 
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.MessageChannel", b =>
+                {
+                    b.HasOne("BuzzBotTwo.Domain.Entities.Server", "Server")
+                        .WithMany()
+                        .HasForeignKey("ServerId");
+
+                    b.HasOne("BuzzBotTwo.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.Page", b =>
+                {
+                    b.HasOne("BuzzBotTwo.Domain.Entities.PaginatedMessage", "Message")
+                        .WithMany("Pages")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.PaginatedMessage", b =>
+                {
+                    b.HasOne("BuzzBotTwo.Domain.Entities.MessageChannel", "MessageChannel")
+                        .WithMany("PaginatedMessages")
+                        .HasForeignKey("MessageChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("BuzzBotTwo.Domain.Entities.Raid", b =>
                 {
+                    b.HasOne("BuzzBotTwo.Domain.Entities.MessageChannel", "Channel")
+                        .WithMany()
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BuzzBotTwo.Domain.Entities.RaidLockout", null)
                         .WithMany("Raids")
                         .HasForeignKey("RaidLockoutId");
+
+                    b.HasOne("BuzzBotTwo.Domain.Entities.Server", "Server")
+                        .WithMany("Raids")
+                        .HasForeignKey("ServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BuzzBotTwo.Domain.Entities.SoftResEvent", "SoftResEvent")
+                        .WithMany()
+                        .HasForeignKey("SoftResEventId");
                 });
 
             modelBuilder.Entity("BuzzBotTwo.Domain.Entities.RaidItem", b =>
@@ -88085,6 +88249,19 @@ namespace BuzzBotTwo.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("BuzzBotTwo.Domain.Entities.SoftResRaidMonitor", b =>
+                {
+                    b.HasOne("BuzzBotTwo.Domain.Entities.MessageChannel", "RaidChannel")
+                        .WithMany()
+                        .HasForeignKey("RaidChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BuzzBotTwo.Domain.Entities.SoftResEvent", "SoftResEvent")
+                        .WithMany()
+                        .HasForeignKey("SoftResEventId");
+                });
+
             modelBuilder.Entity("BuzzBotTwo.Domain.Entities.SoftResRaidTemplate", b =>
                 {
                     b.HasOne("BuzzBotTwo.Domain.Entities.Server", "Server")
@@ -88122,15 +88299,11 @@ namespace BuzzBotTwo.Migrations
 
             modelBuilder.Entity("BuzzBotTwo.Domain.ServerUser", b =>
                 {
-                    b.HasOne("BuzzBotTwo.Domain.BotRole", "Role")
-                        .WithMany()
+                    b.HasOne("BuzzBotTwo.Domain.ServerBotRole", "Role")
+                        .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("BuzzBotTwo.Domain.ServerBotRole", null)
-                        .WithMany("Users")
-                        .HasForeignKey("ServerBotRoleId");
 
                     b.HasOne("BuzzBotTwo.Domain.Entities.Server", "Server")
                         .WithMany("ServerUsers")

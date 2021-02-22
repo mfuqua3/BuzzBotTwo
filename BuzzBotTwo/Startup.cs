@@ -2,12 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using BuzzBotTwo.BackgroundServices;
 using BuzzBotTwo.Configuration;
 using BuzzBotTwo.Discord;
 using BuzzBotTwo.Discord.Services;
 using BuzzBotTwo.Domain;
+using BuzzBotTwo.External.SoftResIt;
 using BuzzBotTwo.Factories;
 using BuzzBotTwo.Repository;
+using BuzzBotTwo.Utility;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Builder;
@@ -16,6 +20,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
 namespace BuzzBotTwo
@@ -33,12 +38,26 @@ namespace BuzzBotTwo
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<DiscordConfiguration>(_configuration.GetSection("Discord"));
-            services.AddDbContext<BotContext>(opt => opt.UseSqlite(_configuration.GetConnectionString("DefaultConnection")));
+            var mapperConfig = new MapperConfiguration(cfg => cfg.AddProfile<MapperProfile>());
+            services.Configure<BackgroundProcessesConfiguration>(_configuration.GetSection("BackgroundProcesses"));
+            services.AddDbContext<BotContext>(opt =>
+                {
+                    opt.UseSqlite(_configuration.GetConnectionString("DefaultConnection"));
+                    opt.EnableSensitiveDataLogging();
+                    opt.EnableDetailedErrors();
+                });
             services.AddDiscordComponents()
                 .AddRepositories()
+                .AddSingleton(mapperConfig.CreateMapper())
                 .AddTransient<ISoftResRaidTemplateFactory, SoftResRaidTemplateFactory>()
                 .AddTransient<ITemplateConfigurationService, TemplateConfigurationService>()
-                .AddScoped<IUserDataService, UserDataService>();
+                .AddScoped<IUserDataService, UserDataService>()
+                .AddScoped<IChannelService, ChannelService>()
+                .AddScoped<IRaidMonitorMessageFactory, RaidMonitorMessageFactory>()
+                .AddTransient<IMessageChannelFactory, MessageChannelFactory>()
+                .AddTransient<ISoftResClient, SoftResClient>()
+                .AddHostedService<PageMonitorService>()
+                .AddHostedService<SoftResMonitorService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

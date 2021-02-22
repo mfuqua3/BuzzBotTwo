@@ -27,11 +27,10 @@ namespace BuzzBotTwo.Discord
             var client = new DiscordSocketClient(config);
             services.AddSingleton(client)
                 .AddScoped<ScopedCommandContext>()
-                .AddSingleton<IAdministrationService, AdministrationService>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddTransient<IQueryService, QueryService>()
-                .AddTransient<IPageService, PageService>()
+                .AddScoped<IPageService, PageService>()
                 .AddTransient<IEmoteService, EmoteService>();
             return services;
         }

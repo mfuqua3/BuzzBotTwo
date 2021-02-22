@@ -10,7 +10,7 @@ namespace BuzzBotTwo.Domain
         public Server Server { get; set; }
         public ulong UserId { get; set; }
         public User User { get; set; }
-        public int RoleId { get; set; }
-        public BotRole Role { get; set; }
+        public ulong RoleId { get; set; }
+        public ServerBotRole Role { get; set; }
     }
 }

@@ -9,65 +9,73 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BuzzBotTwo.Repository
 {
-    public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class, IEntity<TKey>
-    where TKey :  IComparable, IEquatable<TKey>
+    public interface IPaginatedMessageRepository : IRepository<PaginatedMessage, ulong> { }
+
+    public class PaginatedMessageRepository : Repository<PaginatedMessage, ulong>, IPaginatedMessageRepository
     {
-        private readonly BotContext _db;
+        public PaginatedMessageRepository(BotContext db) : base(db)
+        {
+        }
+    }
+    public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class, IEntity<TKey>
+    where TKey : IComparable, IEquatable<TKey>
+    {
+        protected readonly BotContext Db;
 
         public Repository(BotContext db)
         {
-            _db = db;
+            Db = db;
         }
 
-        public async Task<bool> Contains(TKey key)
+        public virtual async Task<bool> Contains(TKey key)
         {
-            return (await _db.Set<TEntity>().FindAsync(key) != default(TEntity));
+            return (await Db.Set<TEntity>().FindAsync(key) != default(TEntity));
         }
 
-        public async Task<TEntity> FindAsync(TKey id, QueryInject<TEntity> queryInject = null)
+        public virtual async Task<TEntity> FindAsync(TKey id, QueryInject<TEntity> queryInject = null)
         {
-            IQueryable<TEntity> query = _db.Set<TEntity>();
+            IQueryable<TEntity> query = Db.Set<TEntity>();
             if (queryInject != null)
             {
-                query = queryInject(query);
+                query = queryInject(query, Db);
             }
 
             return await query.FirstOrDefaultAsync(ent => ent.Id.Equals(id));
         }
 
-        public async Task<List<TEntity>> GetAsync(QueryInject<TEntity> queryInject = null)
+        public virtual async Task<List<TEntity>> GetAsync(QueryInject<TEntity> queryInject = null)
         {
-            IQueryable<TEntity> query = _db.Set<TEntity>();
+            IQueryable<TEntity> query = Db.Set<TEntity>();
             if (queryInject != null)
             {
-                query = queryInject(query);
+                query = queryInject(query, Db);
             }
 
             return await query.ToListAsync();
         }
 
-        public async Task<bool> PostAsync(TEntity entity)
+        public virtual async Task<bool> PostAsync(TEntity entity)
         {
-            return (await _db.Set<TEntity>().AddAsync(entity)) != null;
+            return (await Db.Set<TEntity>().AddAsync(entity)) != null;
         }
 
-        public async Task<bool> PutAsync(TEntity entity)
+        public virtual async Task<bool> PutAsync(TEntity entity)
         {
-            var existing = await _db.Set<TEntity>().FindAsync(entity.Id);
+            var existing = await Db.Set<TEntity>().FindAsync(entity.Id);
             if (existing == default(TEntity)) return false;
-            _db.Set<TEntity>().Remove(entity);
+            Db.Set<TEntity>().Remove(entity);
             return await PostAsync(entity);
 
         }
 
-        public Task<bool> DeleteAsync(TEntity entity)
+        public virtual Task<bool> DeleteAsync(TEntity entity)
         {
-            return Task.FromResult(_db.Set<TEntity>().Remove(entity) != null);
+            return Task.FromResult(Db.Set<TEntity>().Remove(entity) != null);
         }
 
-        public async Task SaveAllChangesAsync()
+        public virtual async Task SaveAllChangesAsync()
         {
-            await _db.SaveChangesAsync();
+            await Db.SaveChangesAsync();
         }
     }
 }

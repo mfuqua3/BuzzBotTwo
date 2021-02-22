@@ -9,9 +9,11 @@ using BuzzBotTwo.Factories;
 using BuzzBotTwo.Repository;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace BuzzBotTwo.Discord.Modules
 {
+    [Admin]
     [Group(GroupName)]
     public class SoftResModule : BotModule
     {
@@ -20,6 +22,7 @@ namespace BuzzBotTwo.Discord.Modules
         private readonly ISoftResRaidTemplateRepository _softResRaidTemplateRepository;
         private readonly ITemplateConfigurationService _templateConfigurationService;
         private readonly IPageService _pageService;
+        private readonly ISoftResClient _softResClient;
         public const string GroupName = "sr";
 
         public SoftResModule(
@@ -28,7 +31,7 @@ namespace BuzzBotTwo.Discord.Modules
             ISoftResRaidTemplateRepository softResRaidTemplateRepository,
             IUserDataService userDataService,
             ITemplateConfigurationService templateConfigurationService,
-            IPageService pageService)
+            IPageService pageService, ISoftResClient softResClient)
         : base(userDataService)
         {
             _templateFactory = templateFactory;
@@ -36,6 +39,7 @@ namespace BuzzBotTwo.Discord.Modules
             _softResRaidTemplateRepository = softResRaidTemplateRepository;
             _templateConfigurationService = templateConfigurationService;
             _pageService = pageService;
+            _softResClient = softResClient;
         }
         [Command("add")]
         public async Task CreateTemplate(string id, int amount)
@@ -55,7 +59,7 @@ namespace BuzzBotTwo.Discord.Modules
         public async Task PrintTemplates()
         {
             var templates =
-                await _recurringRaidTemplateRepository.GetAsync(qry =>
+                await _recurringRaidTemplateRepository.GetAsync((qry, _) =>
                     qry.Include(tmp => tmp.SoftResTemplate).Where(tmp => tmp.ServerId == Context.Guild.Id));
             var pageBuilder = new PageFormatBuilder()
                 .AddColumn("Template Name")
@@ -113,11 +117,18 @@ namespace BuzzBotTwo.Discord.Modules
             await ReplyAsync("Template updated successfully.");
         }
 
+        [Command("monitor")]
+        public async Task MonitorSoftResRaid(string raidKey, int hoursToMonitor = 5)
+        {
+            var model = await _softResClient.Query(raidKey);
+            await ReplyAsync($"```json\n{JsonConvert.SerializeObject(model, Formatting.Indented)}\n```");
+        }
+
         private async Task<SoftResRaidTemplate> GetTemplate(string templateId)
         {
             return
                 (await _softResRaidTemplateRepository
-                    .GetAsync(qry => qry
+                    .GetAsync((qry, _) => qry
                         .Where(tmp => tmp.ServerId == Context.Guild.Id)))
                 .FirstOrDefault(tmp => tmp.Id == templateId);
         }

@@ -41,6 +41,12 @@ namespace BuzzBotTwo.External.SoftResIt
             return this;
         }
 
+        public ISoftResRaidBuilder ForInstance(string instance)
+        {
+            _raidModel.Instance = instance;
+            return this;
+        }
+
         public ISoftResRaidBuilder TotalReserves(int amount)
         {
             _raidModel.Amount = amount;
@@ -50,6 +56,12 @@ namespace BuzzBotTwo.External.SoftResIt
         public ISoftResRaidBuilder ForFaction(SoftResFaction faction)
         {
             _raidModel.Faction = faction.GetAttributeOfType<SoftResKeyAttribute>().Key;
+            return this;
+        }
+
+        public ISoftResRaidBuilder ForFaction(string faction)
+        {
+            _raidModel.Faction = faction;
             return this;
         }
 

@@ -21,6 +21,10 @@ namespace BuzzBotTwo.Domain
         public DbSet<ReservedItem> ReservedItems { get; set; }
         public DbSet<RecurringRaidTemplate> RecurringRaidTemplates { get; set; }
         public DbSet<SoftResRaidTemplate> SoftResRaidTemplates { get; set; }
+        public DbSet<PaginatedMessage> PaginatedMessages { get; set; }
+        public DbSet<Page> Pages { get; set; }
+        public DbSet<MessageChannel> MessageChannels { get; set; }
+        public DbSet<SoftResRaidMonitor> SoftResRaidMonitors { get; set; }
         public BotContext(DbContextOptions options) : base(options)
         {
 
@@ -30,6 +34,8 @@ namespace BuzzBotTwo.Domain
         {
             modelBuilder.UseSeeder<RoleDataSeeder, BotRole>()
                 .UseSeeder<ItemSeeder, Item>();
+            modelBuilder.Entity<Raid>()
+                .HasIndex(r => r.Active);
             base.OnModelCreating(modelBuilder);
         }
     }
